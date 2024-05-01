@@ -5,7 +5,6 @@ namespace FpDbTest\QueryBuilder;
 class QueryBuilderParametersCountException extends \Exception {}
 
 class QueryBuilder {
-    private mysqli $mysqli;
     private Template $template;
 
     public function compile(string $template, array $params = [])
