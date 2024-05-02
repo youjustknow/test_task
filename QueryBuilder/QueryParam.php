@@ -36,7 +36,7 @@ class QueryParam implements Interface\IValue {
     public function getRawString()
     {
         if (!is_string($this->value)) {
-            throw new QueryParamTypeException("Expected string. Got ".$this->value);
+            throw new QueryParamTypeException("Expected string. Got ".gettype($this->value));
         }
 
         return (string) $this->value;
@@ -45,7 +45,7 @@ class QueryParam implements Interface\IValue {
     public function getIdentifier()
     {
         if (!is_array($this->value) && !is_string($this->value)) {
-            throw new QueryParamTypeException("Expected array or string. Got ".$this->value);
+            throw new QueryParamTypeException("Expected array or string. Got ".gettype($this->value));
         }
 
         if (!is_array($this->value)) {
@@ -64,7 +64,7 @@ class QueryParam implements Interface\IValue {
     public function getString()
     {
         if (!is_string($this->value)) {
-            throw new QueryParamTypeException("Expected string. Got ".$this->value);
+            throw new QueryParamTypeException("Expected string. Got ".gettype($this->value));
         }
 
         return sprintf("'%s'", $this->value);
@@ -74,7 +74,7 @@ class QueryParam implements Interface\IValue {
     {
         if (gettype($this->value) === 'NULL') return 'NULL';
         if (!is_numeric(trim($this->value))) {
-            throw new QueryParamTypeException("Expected integer. Got ".$this->value);
+            throw new QueryParamTypeException("Expected integer. Got ".gettype($this->value));
         }
 
         return intval($this->value);
@@ -84,7 +84,7 @@ class QueryParam implements Interface\IValue {
     {
         if (gettype($this->value) === 'NULL') return 'NULL';
         if (!is_float($this->value)) {
-            throw new QueryParamTypeException("Expected float. Got ".$this->value);
+            throw new QueryParamTypeException("Expected float. Got ".gettype($this->value));
         }
 
         return floatval($this->value);
@@ -103,7 +103,7 @@ class QueryParam implements Interface\IValue {
                 $values[] = $value;
             } else {
                 if (is_array($value)) {
-                    throw new QueryParamTypeException("Expected array of string, integer or double. Got array value ".$value);
+                    throw new QueryParamTypeException("Expected array of string, integer or double. Got array value ".gettype($value));
                 }
 
                 $param = new QueryParam($value);
