@@ -3,14 +3,14 @@
 namespace FpDbTest\QueryBuilder;
 
 class TemplateToken {
-    private QueryParam $value;
+    private Interface\IValue $value;
     private TemplateTokenType $type;
 
     public function __construct(TemplateTokenType $type) {
         $this->type = $type;
     }
 
-    public function setValue(QueryParam $value) {
+    public function setValue(Interface\IValue $value) {
         $this->value = $value;
     }
 

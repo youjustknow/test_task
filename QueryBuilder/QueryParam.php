@@ -4,17 +4,16 @@ namespace FpDbTest\QueryBuilder;
 
 class QueryParamTypeException extends \Exception {}
 
-class QueryParam {
+class QueryParam implements Interface\IValue {
     private mixed $value;
 
     public function __construct(mixed $param)
     {
         if (
-            !in_array(gettype($param), ['string', 'array', 'integer', 'double', 'boolean', 'NULL', 'object']) ||
-            gettype($param) === 'object' && !($param instanceof SkipToken)
+            !in_array(gettype($param), ['string', 'array', 'integer', 'double', 'boolean', 'NULL'])
         ) {
             throw new QueryParamTypeException(
-                "QueryParam type must be one of 'string', 'array', 'integer', 'double', 'bool', 'NULL', 'object'. Got - ".
+                "QueryParam type must be one of 'string', 'array', 'integer', 'double', 'bool', 'NULL'. Got - ".
                 gettype($param)
             );
         }
@@ -31,21 +30,16 @@ class QueryParam {
             case 'double': return $this->getFloat();
             case 'bool': return $this->getNumber();
             case 'NULL': return 'NULL';
-            case 'object': if ($this->value instanceof SkipToken) return $this->value;
         }
     }
 
     public function getRawString()
     {
-        if ($this->value instanceof SkipToken) return $this->value;
-
         return (string) $this->value;
     }
 
     public function getIdentifier()
     {
-        if ($this->value instanceof SkipToken) return $this->value;
-
         if (!is_array($this->value)) {
             return sprintf("`%s`", $this->value);
         } else {
@@ -61,36 +55,28 @@ class QueryParam {
 
     public function getString()
     {
-        if ($this->value instanceof SkipToken) return $this->value;
-
         return sprintf("'%s'", $this->value);
     }
 
     public function getNumber()
     {
-        if ($this->value instanceof SkipToken) return $this->value;
-
         if (gettype($this->value) === 'NULL') return 'NULL';
+        if (!is_numeric(trim($this->value))) throw new QueryParamTypeException("Expected integer. Got ".$this->value);
 
         return intval($this->value);
     }
 
     public function getFloat()
     {
-        if ($this->value instanceof SkipToken) return $this->value;
-
         if (gettype($this->value) === 'NULL') return 'NULL';
+        if (!is_float($this->value)) throw new QueryParamTypeException("Expected float. Got ".$this->value);
 
-        try {
-            return floatval($this->value);
-        } catch (Exception $e) {
-            throw new Exception('Fuck');
-        }
+        return floatval($this->value);
     }
 
     public function getArray()
     {
-        if ($this->value instanceof SkipToken) return $this->value;
+        if (!is_array($this->value)) throw new QueryParamTypeException("Expected array. Got ".gettype($this->value));
 
         $values = [];
 

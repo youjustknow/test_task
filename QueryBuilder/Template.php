@@ -17,21 +17,27 @@ class Template {
         $this->parseTemplate($template);
     }
 
-    public function getValueTokens()
+    public function setParams($params)
     {
-        return $this->valueTokens;
-    }
-
-    public function getTokens()
-    {
-        return $this->tokens;
-    }
-
-    public function getRepresantation()
-    {
+        $tokens = $this->valueTokens;
         $result = [];
 
-        foreach ($this->tokens as $token) {
+        if (count($tokens) !== count($params)) {
+            throw new QueryBuilderParametersCountException('Value tokens count and params count must be equal');
+        }
+
+        foreach ($tokens as $index => $token) {
+            if ($params[$index] instanceof SkipToken) $token->setValue($params[$index]);
+            else $token->setValue(new QueryParam($params[$index]));
+        }
+    }
+
+    public function compile()
+    {
+        $tokens = $this->tokens;
+        $result = [];
+
+        foreach ($tokens as $token) {
             $result[] = $token->getValue();
         }
 
@@ -54,10 +60,10 @@ class Template {
         while (preg_match('/(.*?)(\?[daf#]?)/', $template, $matches, PREG_OFFSET_CAPTURE, $currentIndex)) {
             $currentIndex = $matches[2][1] + strlen($matches[2][0]);
 
-            $strToken = $this->getToken(TemplateTokenType::RawString, $matches[1][0]);
+            $strToken = $this->createToken(TemplateTokenType::RawString, $matches[1][0]);
 
             $valueTokenType = $this->getTokenType(strlen($matches[2][0]) > 1 ? $matches[2][0][1] : '');
-            $valueToken = $this->getToken($valueTokenType);
+            $valueToken = $this->createToken($valueTokenType);
 
             $tokens[] = $strToken;
             $tokens[] = $valueToken;
@@ -65,7 +71,7 @@ class Template {
         }
 
         if ($currentIndex < strlen($template)) {
-            $strToken = $this->getToken(TemplateTokenType::RawString, substr($template, $currentIndex));
+            $strToken = $this->createToken(TemplateTokenType::RawString, substr($template, $currentIndex));
             $tokens[] = $strToken;
         }
 
@@ -78,7 +84,7 @@ class Template {
         return $this->TYPES_MAP[$typeSpecifier] ?? TemplateTokenType::Default;
     }
 
-    private function getToken(TemplateTokenType $type, mixed $value = null)
+    private function createToken(TemplateTokenType $type, mixed $value = null)
     {
         $token = new TemplateToken($type);
         if ($value !== null) $token->setValue(new QueryParam($value));
