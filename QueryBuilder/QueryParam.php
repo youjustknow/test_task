@@ -99,17 +99,19 @@ class QueryParam implements Interface\IValue {
         $values = [];
 
         foreach ($this->value as $key => $value) {
+            if (is_array($value) || is_object($value)) {
+                throw new QueryParamTypeException("Expected array of string, integer or double. Got array value ".gettype($value));
+            }
+            
             if (gettype($key) === 'integer') {
                 $values[] = $value;
             } else {
-                if (is_array($value)) {
-                    throw new QueryParamTypeException("Expected array of string, integer or double. Got array value ".gettype($value));
-                }
-
                 $param = new QueryParam($value);
                 $values[] = sprintf("`%s` = %s", $key, $param->getDefault());
             }
         }
+
+        print_r($values);
 
         return implode(', ', $values);
     }
